@@ -1,0 +1,9 @@
+{
+  "name": "Charlie: The Gemini Live Tour Guide",
+  "description": "A next-generation AI travel companion with autonomous vision, historical Street View insights, and persistent tour history, powered by Gemini 2.5 Flash and 3D Google Maps.",
+  "requestFramePermissions": [
+    "microphone",
+    "geolocation",
+    "camera"
+  ]
+}

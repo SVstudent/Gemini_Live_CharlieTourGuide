@@ -1,0 +1,44 @@
+{
+  "entities": {
+    "VisitedLocation": {
+      "title": "Visited Location",
+      "description": "A location visited during a tour.",
+      "type": "object",
+      "properties": {
+        "landmark_id": { "type": "string" },
+        "name": { "type": "string" },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "description": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "uid": { "type": "string", "description": "The user ID of the visitor." }
+      },
+      "required": ["name", "lat", "lng", "timestamp", "uid"]
+    },
+    "FavoriteLandmark": {
+      "title": "Favorite Landmark",
+      "description": "A landmark saved by the user.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "description": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "uid": { "type": "string", "description": "The user ID of the owner." }
+      },
+      "required": ["id", "name", "lat", "lng", "timestamp", "uid"]
+    }
+  },
+  "firestore": {
+    "visited_locations": {
+      "schema": "VisitedLocation",
+      "description": "Collection of all visited locations across all users."
+    },
+    "favorites": {
+      "schema": "FavoriteLandmark",
+      "description": "Collection of user's favorite landmarks."
+    }
+  }
+}

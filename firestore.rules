@@ -1,0 +1,117 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: visited_locations
+// Document ID: auto-generated
+// Fields:
+//   - landmark_id: string (optional)
+//   - name: string (required, 1-100 chars)
+//   - lat: number (required)
+//   - lng: number (required)
+//   - description: string (optional, 0-1000 chars)
+//   - timestamp: string (required, ISO 8601)
+//   - uid: string (required) - owner of the record
+//
+// Collection: favorites
+// Document ID: auto-generated
+// Fields:
+//   - id: string (required) - landmark ID
+//   - name: string (required, 1-100 chars)
+//   - lat: number (required)
+//   - lng: number (required)
+//   - description: string (optional, 0-1000 chars)
+//   - timestamp: string (required, ISO 8601)
+//   - uid: string (required) - owner of the record
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "stevenkrina@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidDateString(dateStr) {
+      return dateStr is string &&
+        dateStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*Z?$");
+    }
+
+    function isValidString(val, min, max) {
+      return val is string && val.size() >= min && val.size() <= max;
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidVisitedLocation(data) {
+      return data.keys().hasAll(['name', 'lat', 'lng', 'timestamp', 'uid']) &&
+             data.keys().hasOnly(['landmark_id', 'name', 'lat', 'lng', 'description', 'timestamp', 'uid']) &&
+             isValidString(data.name, 1, 100) &&
+             data.lat is number &&
+             data.lng is number &&
+             isValidDateString(data.timestamp) &&
+             data.uid == request.auth.uid &&
+             (!('landmark_id' in data) || data.landmark_id is string) &&
+             (!('description' in data) || data.description is string && data.description.size() <= 1000);
+    }
+
+    function isValidFavorite(data) {
+      return data.keys().hasAll(['id', 'name', 'lat', 'lng', 'timestamp', 'uid']) &&
+             data.keys().hasOnly(['id', 'name', 'lat', 'lng', 'description', 'timestamp', 'uid']) &&
+             isValidString(data.id, 1, 100) &&
+             isValidString(data.name, 1, 100) &&
+             data.lat is number &&
+             data.lng is number &&
+             isValidDateString(data.timestamp) &&
+             data.uid == request.auth.uid &&
+             (!('description' in data) || data.description is string && data.description.size() <= 1000);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /visited_locations/{docId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if isAuthenticated() && isValidVisitedLocation(request.resource.data);
+      allow update: if isDocOwner() && isValidVisitedLocation(request.resource.data) && 
+                      request.resource.data.uid == resource.data.uid;
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /favorites/{docId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if isAuthenticated() && isValidFavorite(request.resource.data);
+      allow update: if isDocOwner() && isValidFavorite(request.resource.data) && 
+                      request.resource.data.uid == resource.data.uid;
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+}
