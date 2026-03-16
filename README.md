@@ -154,6 +154,10 @@ Instead of hardcoding API keys in our frontend (a major security risk), our fron
 - **True Mobile Augmented Reality (AR):** Integrating Charlie directly into smartphones so he can process your real-world camera feed while you walk down an actual street, projecting historical facts via AR overlays onto real life buildings.
 - **Multiplayer Synchronized Tours:** Allowing friends in different cities to jump into the same shared map state, experiencing Charlie's narration together simultaneously while seeing each other's pointers.
 
+## RESOURCES
+- LiveAgentAPP = https://charlie-521515342281.us-central1.run.app/
+- YoutubeDemo = https://www.youtube.com/watch?v=dwhRovxIMA0
+
 <div align="center">
   <img src="./docs/assets/charlie_mobile_ar_concept.png" alt="AR Mobile Concept" width="600" />
 </div>
